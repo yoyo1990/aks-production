@@ -2,12 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: services-ingress
+  namespace: bitcoin-app
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    # Basic Authentication - רק עם username/password
+    # 🔐 Basic Authentication - מופעל!
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: bitcoin-auth
-    nginx.ingress.kubernetes.io/auth-realm: "Bitcoin Analytics - Authentication Required"
+    nginx.ingress.kubernetes.io/auth-realm: "Bitcoin API Access - Please Login"
     # Rate limiting - חיסכון בעלויות
     nginx.ingress.kubernetes.io/rate-limit-rpm: "20"
     # Brute force protection - חסימה אחרי 5 ניסיונות כושלים
@@ -22,6 +23,13 @@ spec:
   rules:
     - http:
         paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-a
+                port:
+                  number: 80
           - path: /service-A
             pathType: Prefix
             backend:

@@ -50,7 +50,7 @@ def home():
     with lock:
         if not prices:
             data = {
-                "service": "Bitcoin Price Service A",
+                "service": "Bitcoin Price Service B",
                 "status": "initializing",
                 "samples": 0,
                 "price": None,
@@ -60,7 +60,7 @@ def home():
             last_ts, last_price = prices[-1]
             avg = sum(p for _, p in prices) / len(prices)
             data = {
-                "service": "Bitcoin Price Service A",
+                "service": "Bitcoin Price Service B",
                 "status": "active",
                 "last_timestamp": last_ts,
                 "last_price": last_price,
@@ -70,18 +70,18 @@ def home():
                 "average": round(avg, 2)
             }
         
-        # Return beautiful HTML page
+        # Return beautiful HTML page with different color scheme
         html = f"""
         <!DOCTYPE html>
         <html dir="rtl" lang="he">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>🪙 Bitcoin Price Monitor - Service A</title>
+            <title>🪙 Bitcoin Price Monitor - Service B</title>
             <style>
                 body {{
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
                     margin: 0;
                     padding: 20px;
                     min-height: 100vh;
@@ -102,13 +102,14 @@ def home():
                 .bitcoin-logo {{
                     width: 80px;
                     height: 80px;
-                    background: linear-gradient(135deg, #f7931a, #ffb347);
+                    background: linear-gradient(135deg, #2196F3, #64B5F6);
                     border-radius: 50%;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 40px;
                     margin-bottom: 15px;
+                    color: white;
                 }}
                 .title {{
                     color: #333;
@@ -132,7 +133,7 @@ def home():
                     padding: 25px;
                     border-radius: 15px;
                     box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-                    border-left: 5px solid #f7931a;
+                    border-left: 5px solid #2196F3;
                     transition: transform 0.3s ease;
                 }}
                 .card:hover {{
@@ -153,13 +154,13 @@ def home():
                     margin: 10px 0;
                 }}
                 .price {{
-                    color: #28a745;
+                    color: #4CAF50;
                 }}
                 .average {{
-                    color: #007bff;
+                    color: #2196F3;
                 }}
                 .status {{
-                    color: #28a745;
+                    color: #4CAF50;
                 }}
                 .samples {{
                     color: #6c757d;
@@ -174,19 +175,28 @@ def home():
                     display: inline-block;
                     padding: 5px 15px;
                     border-radius: 20px;
-                    background: #28a745;
+                    background: #2196F3;
                     color: white;
                     font-size: 0.8em;
                     font-weight: bold;
                     margin-top: 10px;
                 }}
                 .refresh-info {{
-                    background: rgba(23, 162, 184, 0.1);
+                    background: rgba(33, 150, 243, 0.1);
                     padding: 15px;
                     border-radius: 10px;
                     margin-top: 20px;
                     text-align: center;
-                    color: #17a2b8;
+                    color: #2196F3;
+                }}
+                .service-b-badge {{
+                    background: linear-gradient(135deg, #2196F3, #64B5F6);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 25px;
+                    display: inline-block;
+                    margin-bottom: 20px;
+                    font-weight: bold;
                 }}
             </style>
             <script>
@@ -201,12 +211,12 @@ def home():
                 <div class="header">
                     <div class="bitcoin-logo">₿</div>
                     <h1 class="title">מעקב מחיר ביטקוין</h1>
-                    <p class="service-name">שירות A - נתונים חיים</p>
+                    <div class="service-b-badge">🔵 שירות B - מסד נתונים משני</div>
                 </div>
                 
                 <div class="cards">
                     <div class="card">
-                        <div class="card-title">💰 מחיר נוכחי</div>
+                        <div class="card-title">💎 מחיר נוכחי</div>
                         <div class="card-value price">
                             {"$" + f"{data['price']:,.2f}" if data['price'] else "טוען..."}
                         </div>
@@ -222,27 +232,27 @@ def home():
                     </div>
                     
                     <div class="card">
-                        <div class="card-title">📈 דגימות</div>
+                        <div class="card-title">🔢 דגימות</div>
                         <div class="card-value samples">{data['samples']}/10</div>
                         <small>נתונים שנאספו</small>
                     </div>
                     
                     <div class="card">
-                        <div class="card-title">⏰ סטטוס</div>
-                        <div class="card-value status">{"🟢 פעיל" if data['status'] == 'active' else "🟡 מאתחל"}</div>
-                        <small>{data.get('service', 'Service A')}</small>
+                        <div class="card-title">⚡ סטטוס מערכת</div>
+                        <div class="card-value status">{"🔵 מחובר" if data['status'] == 'active' else "🟡 מתחבר"}</div>
+                        <small>שירות B פעיל</small>
                     </div>
                 </div>
                 
                 <div class="refresh-info">
-                    🔄 הדף מתעדכן אוטומטית כל 30 שניות
+                    🔄 רענון אוטומטי כל 30 שניות
                     <br>
-                    📡 מקור נתונים: CoinGecko API
+                    📊 שירות גיבוי ומעקב משני
                 </div>
                 
                 <div class="footer">
-                    <p>🚀 Powered by Azure AKS | 🔐 Protected by nginx | 🐳 Containerized with Docker</p>
-                    <p>עדכון אחרון: {data.get('last_timestamp', 'N/A')}</p>
+                    <p>🌐 Azure Kubernetes Service | 🛡️ Secured by nginx | 🔐 Authenticated Access</p>
+                    <p>Service B - עדכון אחרון: {data.get('last_timestamp', 'N/A')}</p>
                 </div>
             </div>
         </body>
