@@ -1,0 +1,58 @@
+# 🐳 Docker Compose לבדיקה מקומית
+version: '3.8'
+
+services:
+  # 🪙 Bitcoin Service A
+  service-a:
+    image: bitcoin-app-a:latest
+    container_name: bitcoin-service-a
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - bitcoin-network
+
+  # 🎯 Service B (זהה לA אבל ללא חשיפה חיצונית)
+  service-b:
+    image: bitcoin-app-b:latest
+    container_name: bitcoin-service-b
+    # אין ports - רק גישה פנימית
+    environment:
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - bitcoin-network
+
+  # 🌐 Nginx Proxy (סימולציה של Ingress)
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: bitcoin-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro
+    depends_on:
+      - service-a
+      - service-b
+    restart: unless-stopped
+    networks:
+      - bitcoin-network
+
+networks:
+  bitcoin-network:
+    driver: bridge
+    # 🔒 Network isolation simulation

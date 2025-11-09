@@ -1,0 +1,13 @@
+# Simple auth test with nginx
+version: '3.8'
+
+services:
+  auth-test:
+    image: nginx:alpine
+    container_name: auth-test-only
+    ports:
+      - "8888:80"  # פורט אחר כדי לא להפריע
+    volumes:
+      - ./test-nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./test.htpasswd:/etc/nginx/.htpasswd:ro
+    restart: no

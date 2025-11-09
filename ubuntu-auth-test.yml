@@ -1,0 +1,13 @@
+# Auth test with Ubuntu nginx (יותר מלא)
+version: '3.8'
+
+services:
+  auth-test-ubuntu:
+    image: nginx:latest  # Ubuntu based
+    container_name: auth-ubuntu-test
+    ports:
+      - "9999:80"  # פורט שונה
+    volumes:
+      - ./simple-nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./simple.htpasswd:/etc/nginx/.htpasswd:ro
+    restart: no
