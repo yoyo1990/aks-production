@@ -1,0 +1,83 @@
+# הגנות מתקדמות נוספות לAKS - חינם!
+
+## 1. 🚫 Pod Security Standards (מחליף את Pod Security Policy)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bitcoin-app
+  labels:
+    # רמת ביטחון גבוהה
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+## 2. 🔐 Security Context קשוח
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-bitcoin-app
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: app
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL  # הסרת כל הpermissions
+          readOnlyRootFilesystem: true  # מניעת כתיבה
+          runAsNonRoot: true
+
+---
+## 3. 🎯 Resource Limits (מניעת DoS)
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: resource-limits
+spec:
+  limits:
+  - default:
+      cpu: "200m"
+      memory: "128Mi"
+    defaultRequest:
+      cpu: "100m"
+      memory: "64Mi"
+    max:
+      cpu: "500m"
+      memory: "256Mi"
+    type: Container
+
+---
+## 4. 🔒 RBAC מינימלי
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bitcoin-app-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bitcoin-app-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bitcoin-app-binding
+subjects:
+- kind: ServiceAccount
+  name: bitcoin-app-sa
+roleRef:
+  kind: Role
+  name: bitcoin-app-role
+  apiGroup: rbac.authorization.k8s.io

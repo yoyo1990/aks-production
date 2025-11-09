@@ -1,0 +1,84 @@
+# הגנות נוספות עם Network Policy - חינם לחלוטין!
+
+---
+# 1. חסימת גישה למטדטה של AWS/Azure (מניעת privilege escalation)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-metadata-access
+spec:
+  podSelector: {} # חל על כל הPods
+  policyTypes:
+    - Egress
+  egress:
+    # חסימת גישה למטדטה servers
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+    # אבל לא לכתובות מטדטה
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32  # Azure metadata
+              - 169.254.169.123/32  # AWS metadata
+
+---
+# 2. הגבלת פורטים - רק מה שצריך
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: strict-port-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: service-a
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # רק ingress controller על פורט 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # רק HTTPS החוצה לCoinGecko API
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443  # HTTPS לAPI
+        - protocol: UDP  
+          port: 53   # DNS lookups
+
+---
+# 3. בידוד namespace (אם יש כמה environments)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: namespace-isolation
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # רק מאותו namespace
+    - from:
+        - podSelector: {}
+  egress:
+    # רק לאותו namespace + DNS + חוץ
+    - to:
+        - podSelector: {}
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: service-b
+  namespace: bitcoin-app  # 🎯 רץ בnamespace מאובטח
   labels:
     app: service-b
 spec:
@@ -14,9 +15,24 @@ spec:
       labels:
         app: service-b
     spec:
+      # 🔐 Security Context - הגנות ברמת Pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: service-b
           image: REPLACE_WITH_ACR_LOGIN/service-b:latest
+          # 🛡️ Container Security
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false  # Flask צריך לכתוב logs
+            runAsNonRoot: true
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

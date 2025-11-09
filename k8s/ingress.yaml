@@ -4,6 +4,20 @@ metadata:
   name: services-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    # Basic Authentication - רק עם username/password
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: bitcoin-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Bitcoin Analytics - Authentication Required"
+    # Rate limiting - חיסכון בעלויות
+    nginx.ingress.kubernetes.io/rate-limit-rpm: "20"
+    # Brute force protection - חסימה אחרי 5 ניסיונות כושלים
+    nginx.ingress.kubernetes.io/limit-connections: "3"
+    nginx.ingress.kubernetes.io/limit-rps: "1"
+    # חסימת IP אחרי כשלונות אימות
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User,X-Auth-Request-Email"
+    # Timeout קצר לחיסכון במשאבים  
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
 spec:
   rules:
     - http:

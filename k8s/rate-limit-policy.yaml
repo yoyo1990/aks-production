@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rate-limit-protection
+spec:
+  podSelector:
+    matchLabels:
+      app: service-a
+  policyTypes:
+    - Ingress
+  ingress:
+    # אפשר רק מ-ingress controller ועם rate limiting
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+          
+---
+# ConfigMap for advanced rate limiting
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-rate-limit-config
+  namespace: ingress-nginx
+data:
+  # חסימת IP אחרי 5 ניסיונות כושלים בדקה
+  limit-rate-after: "5"
+  limit-rate: "1r/s"
+  # חסימה למשך 5 דקות
+  limit-req-zone: "$binary_remote_addr zone=auth:10m rate=5r/m"
+  # לוגים מפורטים לניטור
+  access-log: "true"
+  error-log-level: "warn"

@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: deny-a-to-b
+  namespace: bitcoin-app  # 🎯 עובד בnamespace המאובטח
 spec:
   podSelector:
     matchLabels:
